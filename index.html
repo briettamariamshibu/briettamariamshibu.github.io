@@ -1,0 +1,1265 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Student Academic Planner - Creative Edition</title>
+<style>
+  /* Reset & base */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    color: #f0f2f5;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Scrollbar styling for WebKit */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(255 255 255 / 0.05);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(139 92 246 / 0.7);
+    border-radius: 6px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(6 182 212 / 0.8);
+  }
+
+  /* Color variables: Light on dark for creative look */
+  :root {
+    --color-bg: rgba(28, 28, 38, 0.75);
+    --color-bg-alt: rgba(40, 40, 56, 0.6);
+    --color-primary: #06b6d4;
+    --color-primary-alt: #8b5cf6;
+    --color-text-primary: #e3e6fb;
+    --color-text-muted: #a9a6c9;
+    --color-success: #3cba54;
+    --color-warning: #f4b400;
+    --color-error: #db4437;
+    --color-border: rgba(139, 92, 246, 0.3);
+    --color-shadow: rgba(6, 182, 212, 0.25);
+    --transition-speed: 0.25s;
+  }
+
+  /* Layout: Header, main, footer flex */
+  #app {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    backdrop-filter: blur(15px);
+    position: relative;
+    z-index: 2;
+  }
+  main {
+    flex-grow: 1;
+    padding: 32px 16px 64px;
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+    color: var(--color-text-primary);
+  }
+
+  /* Container for page content max width */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* Floating decorative shapes behind content */
+  .floating-shape {
+    position: fixed;
+    border-radius: 50%;
+    filter: drop-shadow(0 0 6px rgba(255 255 255 / 0.15));
+    animation: float 10s ease-in-out infinite;
+    mix-blend-mode: screen;
+    z-index: 0;
+  }
+  .shape-1 {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, #06b6d4, transparent 70%);
+    top: 10vh;
+    left: -60px;
+    animation-delay: 0s;
+  }
+  .shape-2 {
+    width: 140px;
+    height: 140px;
+    background: radial-gradient(circle, #8b5cf6, transparent 70%);
+    bottom: 15vh;
+    right: -50px;
+    animation-delay: 3s;
+  }
+  .shape-3 {
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, #06b6d4 80%, transparent 90%);
+    top: 40vh;
+    right: 20vw;
+    animation-delay: 7s;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0) translateX(0) rotate(0);}
+    50% { transform: translateY(-30px) translateX(15px) rotate(15deg);}
+  }
+
+  /* Responsive header with glass morphism */
+  header {
+    position: sticky;
+    top: 0;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    z-index: 1000;
+    padding: 12px 24px;
+    box-shadow: 0 8px 30px rgba(6, 182, 212, 0.2);
+    backdrop-filter: saturate(180%) blur(16px);
+  }
+
+  .header-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-weight: 700;
+    font-size: 1.75rem;
+    color: var(--color-primary-alt);
+    user-select: text;
+    cursor: default;
+    letter-spacing: 1.2px;
+    text-shadow: 0 2px 8px rgba(139, 92, 246, 0.85);
+  }
+
+  /* Navigation with gradient text on active */
+  nav {
+    display: flex;
+    align-items: center;
+  }
+  nav ul {
+    list-style: none;
+    margin: 0; padding: 0;
+    display: flex;
+    gap: 28px;
+  }
+  nav ul li button.nav-link {
+    font-size: 1.1rem;
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 12px;
+    transition:
+      background-color var(--transition-speed),
+      color var(--transition-speed),
+      transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  nav ul li button.nav-link.active,
+  nav ul li button.nav-link:hover,
+  nav ul li button.nav-link:focus {
+    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    font-weight: 700;
+    outline: none;
+    transform: scale(1.1);
+  }
+  nav ul li button.nav-link span.material-icons {
+    font-size: 22px;
+    color: var(--color-primary-alt);
+    transition: color var(--transition-speed);
+  }
+  nav ul li button.nav-link.active span.material-icons,
+  nav ul li button.nav-link:hover span.material-icons,
+  nav ul li button.nav-link:focus span.material-icons {
+    color: #fff;
+  }
+
+  /* Hamburger */
+  .hamburger-button {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+  }
+  .hamburger-button svg {
+    fill: var(--color-primary-alt);
+    width: 30px;
+    height: 30px;
+  }
+
+  /* Mobile navigation overlay with blur */
+  .mobile-nav {
+    display: none;
+    position: fixed;
+    top: 60px;
+    left: 0; right: 0; bottom: 0;
+    background: var(--color-bg-alt);
+    box-shadow: 0 0 12px var(--color-shadow);
+    z-index: 1500;
+    padding: 24px 32px;
+    overflow-y: auto;
+    backdrop-filter: saturate(180%) blur(20px);
+    border-radius: 0 0 24px 24px;
+  }
+  .mobile-nav.show {
+    display: block;
+  }
+  .mobile-nav ul {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    font-weight: 600;
+  }
+  .mobile-nav ul li button.nav-link {
+    font-size: 1.5rem;
+    justify-content: flex-start;
+    color: var(--color-text-primary);
+  }
+  .mobile-nav ul li button.nav-link span.material-icons {
+    font-size: 28px;
+    margin-right: 12px;
+    color: var(--color-primary-alt);
+  }
+  .mobile-nav ul li button.nav-link.active {
+    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* Footer with glass effect */
+  footer {
+    background: var(--color-bg-alt);
+    border-top: 1px solid var(--color-border);
+    padding: 20px 16px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    backdrop-filter: saturate(150%) blur(16px);
+    box-shadow: 0 -4px 30px rgba(6, 182, 212, 0.15);
+    user-select: none;
+  }
+
+  /* General Typography */
+  h1,h2,h3,h4,h5,h6 {
+    color: var(--color-text-primary);
+    margin-bottom: 16px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  h1 {
+    font-size: 3rem;
+    line-height: 1.2;
+    text-shadow: 0 2px 12px rgba(139, 92, 246, 0.4);
+  }
+  h2 {
+    font-size: 2rem;
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 8px;
+    margin-bottom: 32px;
+  }
+  h3 {
+    font-size: 1.3rem;
+  }
+  p {
+    margin-bottom: 20px;
+  }
+
+  /* Button base with gradient and micro animations */
+  .btn {
+    padding: 10px 24px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border-radius: 18px;
+    border: none;
+    cursor: pointer;
+    transition:
+      background-color var(--transition-speed),
+      box-shadow var(--transition-speed),
+      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
+    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+    will-change: transform;
+  }
+  .btn:hover,
+  .btn:focus {
+    background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+    box-shadow: 0 6px 18px rgba(139, 92, 246, 0.5);
+    transform: scale(1.05);
+    outline: none;
+  }
+
+  /* Icon style inside buttons and nav */
+  .material-icons {
+    font-family: 'Material Icons Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    direction: ltr;
+    user-select: none;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Pages container controls */
+  .page {
+    display: none;
+    opacity: 0;
+    transform: translateY(15px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .page.active {
+    display: block;
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Home page */
+  #home-page {
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  #motivational-quote {
+    font-style: italic;
+    font-size: 1.5rem;
+    margin-top: 40px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #0b188a, #3c067a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    user-select: text;
+    transition: opacity 0.6s ease;
+  }
+  #change-quote-btn {
+    margin-top: 24px;
+  }
+
+  /* Subjects page with glass card style */
+  #subjects-page {
+    max-width: 720px;
+  }
+  .subject-list {
+    margin-top: 24px;
+    border-radius: 20px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-alt);
+    box-shadow: 0 8px 24px rgba(6, 182, 212, 0.15);
+    backdrop-filter: saturate(200%) blur(20px);
+    padding: 16px 12px;
+  }
+  .subject-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--color-border);
+    align-items: center;
+    gap: 12px;
+  }
+  .subject-item:last-child {
+    border-bottom: none;
+  }
+  .subject-name {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--color-text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .subject-name .material-icons {
+    font-size: 28px;
+    color: var(--color-primary);
+    filter: drop-shadow(0 0 3px var(--color-primary));
+  }
+  .subject-grade {
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: var(--color-primary-alt);
+    min-width: 45px;
+    text-align: right;
+  }
+
+  /* To-Do page with card style and icon */
+  #todo-page {
+    max-width: 720px;
+  }
+  #todo-form {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.4));
+  }
+  #todo-input {
+    flex-grow: 1;
+    border: none;
+    border-radius: 20px;
+    padding: 14px 18px;
+    font-size: 1.1rem;
+    color: var(--color-text-primary);
+    background: var(--color-bg-alt);
+    transition: box-shadow var(--transition-speed);
+    box-shadow: inset 0 0 6px rgba(139, 92, 246, 0.2);
+  }
+  #todo-input::placeholder {
+    color: var(--color-text-muted);
+  }
+  #todo-input:focus {
+    outline: none;
+    box-shadow: inset 0 0 12px var(--color-primary-alt);
+  }
+  #todo-list {
+    list-style: none;
+    margin: 0; padding: 0;
+  }
+  #todo-list li {
+    display: flex;
+    align-items: center;
+    padding: 18px 22px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    gap: 16px;
+    background: var(--color-bg-alt);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.12);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  #todo-list li:hover,
+  #todo-list li:focus-within {
+    box-shadow: 0 9px 30px rgba(139, 92, 246, 0.3);
+    transform: translateY(-3px);
+    outline: none;
+  }
+  #todo-list li.completed .todo-text {
+    text-decoration: line-through;
+    color: var(--color-text-muted);
+    opacity: 0.7;
+  }
+  .todo-checkbox {
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    accent-color: var(--color-primary-alt);
+    flex-shrink: 0;
+  }
+  .todo-text {
+    flex-grow: 1;
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+  .todo-remove-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-error);
+    font-size: 28px;
+    user-select: none;
+    transition: color var(--transition-speed);
+    line-height: 0;
+  }
+  .todo-remove-btn:hover,
+  .todo-remove-btn:focus {
+    color: #a33226;
+    outline: none;
+  }
+
+  /* Calendar page with transparent glass card */
+  #calendar-page {
+    max-width: 630px;
+  }
+  .calendar-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  .calendar-controls select {
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-alt);
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    appearance: none; /* Remove default arrow */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23e3e6fb" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 8px top 50%;
+    background-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(6, 182, 212, 0.1);
+    transition: box-shadow 0.3s ease;
+  }
+  .calendar-controls select:hover,
+  .calendar-controls select:focus {
+    box-shadow: 0 6px 18px rgba(8, 184, 214, 0.5);
+    outline: none;
+  }
+
+  .calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 12px;
+    background: var(--color-bg-alt);
+    padding: 10px;
+    border-radius: 24px;
+    box-shadow: 0 8px 28px rgba(6, 182, 212, 0.15);
+    backdrop-filter: saturate(180%) blur(24px);
+  }
+  .calendar-day-header {
+    font-weight: 700;
+    text-align: center;
+    color: var(--color-primary-alt);
+    padding: 12px 0;
+    user-select: none;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.5));
+  }
+  .calendar-day {
+    background: var(--color-bg);
+    min-height: 90px;
+    border-radius: 20px;
+    padding: 10px 14px;
+    box-shadow: 0 6px 20px rgba(6, 182, 212, 0.15);
+    font-size: 0.95rem;
+    display: flex;
+    flex-direction: column;
+    transition: background-color 0.3s ease;
+    position: relative;
+  }
+  .calendar-day.today {
+    border: 2px solid var(--color-primary);
+    box-shadow: 0 0 20px 2px var(--color-primary-alt);
+  }
+  .calendar-date {
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--color-primary-alt);
+    text-align: right;
+    font-size: 1.1rem;
+  }
+  .calendar-event {
+    background: var(--color-primary-alt);
+    color: white;
+    border-radius: 12px;
+    padding: 3px 10px;
+    margin-bottom: 6px;
+    font-size: 0.75rem;
+    user-select: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    filter: drop-shadow(0 0 3px rgba(6, 182, 212, 0.8));
+    cursor: default;
+  }
+  .calendar-event:hover {
+    filter: drop-shadow(0 0 8px rgba(6, 182, 212, 1));
+  }
+
+  /* Timer page */
+  #timer-page {
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+  .timer-display {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 6.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--color-primary-alt);
+    user-select: none;
+    position: relative;
+    width: 200px;
+    height: 200px;
+  }
+  /* Circular progress ring behind the timer */
+  .timer-display svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+  .timer-display circle.bg {
+    stroke: rgba(139, 92, 246, 0.2);
+    stroke-width: 12;
+    fill: none;
+  }
+  .timer-display circle.progress {
+    stroke: #06b6d4;
+    stroke-width: 12;
+    stroke-linecap: round;
+    fill: none;
+    transition: stroke-dashoffset 1s linear;
+  }
+  /* The numeric time text in center */
+  .timer-text {
+    position: absolute;
+    inset: 0;
+    text-align: center;
+    line-height: 190px;
+    font-size: 6.5rem;
+    font-weight: 700;
+    color: var(--color-primary-alt);
+    user-select: none;
+    pointer-events: none;
+    filter: drop-shadow(0 1px 3px rgba(6, 182, 212, 0.8));
+  }
+  /* Timer controls */
+  .timer-controls {
+    display: flex;
+    gap: 24px;
+  }
+  .timer-btn {
+    padding: 14px 36px;
+    font-size: 1.4rem;
+    border-radius: 24px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.8);
+    transition: background-color var(--transition-speed), transform 0.3s ease;
+    user-select: none;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    will-change: transform;
+  }
+  .timer-btn:hover,
+  .timer-btn:focus {
+    background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+    outline: none;
+    transform: scale(1.08) translateY(-4px);
+  }
+  .timer-mode-buttons {
+    margin-top: 40px;
+    display: flex;
+    gap: 16px;
+  }
+  .timer-mode-btn {
+    padding: 10px 24px;
+    border-radius: 20px;
+    border: 2px solid var(--color-primary-alt);
+    background: transparent;
+    color: var(--color-primary-alt);
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1.15rem;
+    transition:
+      background-color var(--transition-speed),
+      color var(--transition-speed),
+      transform 0.3s ease;
+    user-select: none;
+  }
+  .timer-mode-btn.active,
+  .timer-mode-btn:hover,
+  .timer-mode-btn:focus {
+    background: linear-gradient(135deg, #61079f , #06b6d4);
+    color: white;
+    outline: none;
+    transform: scale(1.1);
+  }
+
+  /* Responsive breakpoints */
+
+  /* Mobile: 320-767px */
+  @media (max-width: 767px) {
+    nav ul {
+      display: none;
+    }
+    .hamburger-button {
+      display: flex;
+    }
+    header {
+      padding: 12px 12px 10px;
+      max-height: 70px;
+    }
+    main {
+      padding: 24px 16px 64px;
+    }
+    h1 {
+      font-size: 2.2rem;
+      text-shadow: 0 2px 10px rgba(139, 92, 246, 0.5);
+    }
+    h2 {
+      font-size: 1.6rem;
+      margin-bottom: 24px;
+    }
+    .timer-display {
+      width: 150px;
+      height: 150px;
+      font-size: 4.2rem;
+    }
+    .timer-text {
+      line-height: 140px;
+      font-size: 4.2rem;
+    }
+    .timer-btn {
+      font-size: 1.1rem;
+      padding: 12px 28px;
+    }
+  }
+
+  /* Tablet: 768-1023px */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    main {
+      padding: 32px 32px 64px;
+      max-width: 720px;
+    }
+  }
+
+  /* Desktop: 1024-1439px */
+  @media (min-width: 1024px) and (max-width: 1439px) {
+    main {
+      max-width: 960px;
+      padding: 40px 56px 72px;
+    }
+  }
+
+  /* Large desktop: > 1440px */
+  @media (min-width: 1440px) {
+    main {
+      max-width: 1280px;
+      padding: 40px 72px 80px;
+    }
+  }
+
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter&family=Roboto+Mono&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+</head>
+<body>
+  <div id="app" role="application" aria-label="Student Academic Planner">
+    <div class="floating-shape shape-1" aria-hidden="true"></div>
+    <div class="floating-shape shape-2" aria-hidden="true"></div>
+    <div class="floating-shape shape-3" aria-hidden="true"></div>
+
+    <header>
+      <div class="header-inner">
+        <div class="logo" tabindex="0" aria-label="Student Academic Planner Logo">AcadPlanner</div>
+        <nav aria-label="Primary Navigation">
+          <ul>
+            <li><button class="nav-link active" data-page="home" aria-current="page" aria-label="Home page"> <span class="material-icons">home</span> Home </button></li>
+            <li><button class="nav-link" data-page="subjects" aria-label="Subjects and grades page"> <span class="material-icons">school</span> Subjects </button></li>
+            <li><button class="nav-link" data-page="todo" aria-label="To-Do List page"> <span class="material-icons">check_circle_outline</span> To-Do List </button></li>
+            <li><button class="nav-link" data-page="calendar" aria-label="Academic Calendar page"> <span class="material-icons">calendar_today</span> Calendar </button></li>
+            <li><button class="nav-link" data-page="timer" aria-label="Study Timer page"> <span class="material-icons">timer</span> Timer </button></li>
+          </ul>
+        </nav>
+        <button class="hamburger-button" aria-label="Toggle mobile menu" aria-expanded="false" aria-controls="mobile-menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18M3 12h18M3 18h18" stroke-width="2" stroke="#8b5cf6" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <nav class="mobile-nav" id="mobile-menu" aria-label="Mobile primary navigation" hidden>
+        <ul>
+          <li><button class="nav-link" data-page="home"> <span class="material-icons">home</span> Home </button></li>
+          <li><button class="nav-link" data-page="subjects"> <span class="material-icons">school</span> Subjects </button></li>
+          <li><button class="nav-link" data-page="todo"> <span class="material-icons">check_circle_outline</span> To-Do List </button></li>
+          <li><button class="nav-link" data-page="calendar"> <span class="material-icons">calendar_today</span> Calendar </button></li>
+          <li><button class="nav-link" data-page="timer"> <span class="material-icons">timer</span> Timer </button></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section id="home-page" class="page active" role="main" tabindex="-1">
+        <h1>Welcome to my Academic Planner</h1>
+        <p id="motivational-quote" aria-live="polite" aria-atomic="true">"Education is the most powerful weapon which you can use to change the world." - Nelson Mandela</p>
+        <button id="change-quote-btn" class="btn" aria-label="Change motivational quote" aria-describedby="quote-desc">Change Quote</button>
+
+      </section>
+
+      <section id="subjects-page" class="page" role="main" tabindex="-1">
+        <h2>Subjects & Grades</h2>
+        <div class="subject-list" aria-live="polite" aria-atomic="true" aria-relevant="all">
+          </div>
+      </section>
+
+      <section id="todo-page" class="page" role="main" tabindex="-1">
+        <h2>To-Do List</h2>
+        <form id="todo-form" aria-label="Add a new task to your to-do list">
+          <input id="todo-input" type="text" placeholder="Add new task..." aria-required="true" aria-label="Task description" autocomplete="off" />
+          <button type="submit" class="btn" aria-label="Add task">Add</button>
+        </form>
+        <ul id="todo-list" aria-live="polite" aria-atomic="true" tabindex="0" aria-label="List of tasks">
+          </ul>
+      </section>
+
+      <section id="calendar-page" class="page" role="main" tabindex="-1">
+        <h2>Academic Calendar</h2>
+        <div class="calendar-controls">
+          <select id="month-select" aria-label="Select month"></select>
+          <select id="year-select" aria-label="Select year"></select>
+        </div>
+        <div class="calendar" role="grid" aria-label="Academic events calendar">
+          <div class="calendar-day-header" role="columnheader">Sun</div>
+          <div class="calendar-day-header" role="columnheader">Mon</div>
+          <div class="calendar-day-header" role="columnheader">Tue</div>
+          <div class="calendar-day-header" role="columnheader">Wed</div>
+          <div class="calendar-day-header" role="columnheader">Thu</div>
+          <div class="calendar-day-header" role="columnheader">Fri</div>
+          <div class="calendar-day-header" role="columnheader">Sat</div>
+        </div>
+      </section>
+
+      <section id="timer-page" class="page" role="main" tabindex="-1">
+        <h2>Study Pomodoro Timer</h2>
+        <div class="timer-display" aria-live="polite" aria-atomic="true" aria-label="Timer display">
+          <svg viewBox="0 0 120 120" role="img" aria-hidden="true" focusable="false">
+            <circle class="bg" cx="60" cy="60" r="54" />
+            <circle class="progress" cx="60" cy="60" r="54" stroke-dasharray="339.292" stroke-dashoffset="339.292" />
+          </svg>
+          <div class="timer-text" id="timer-text">25:00</div>
+        </div>
+        <div class="timer-controls">
+          <button class="timer-btn" id="start-pause-btn" aria-pressed="false" aria-label="Start or pause timer">Start</button>
+          <button class="timer-btn" id="reset-btn" aria-label="Reset timer">Reset</button>
+        </div>
+        <div class="timer-mode-buttons" role="radiogroup" aria-label="Timer mode selection">
+          <button class="timer-mode-btn active" id="mode-work" role="radio" aria-checked="true" aria-label="Work mode">Work</button>
+          <button class="timer-mode-btn" id="mode-break" role="radio" aria-checked="false" aria-label="Break mode">Break</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      &copy; 2025 Student Academic Planner. Crafted for focus and creativity.
+    </footer>
+  </div>
+
+<script>
+  (() => {
+    // Navigation and responsive menu
+    const navLinks = document.querySelectorAll('button.nav-link');
+    const pages = document.querySelectorAll('.page');
+    const hamburgerBtn = document.querySelector('.hamburger-button');
+    const mobileNav = document.querySelector('.mobile-nav');
+
+    function setActivePage(pageId) {
+      pages.forEach(p => {
+        if(p.id === pageId + '-page') {
+          p.classList.add('active');
+          p.focus();
+        } else {
+          p.classList.remove('active');
+        }
+      });
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.dataset.page === pageId);
+        if(link.dataset.page === pageId) link.setAttribute('aria-current', 'page');
+        else link.removeAttribute('aria-current');
+      });
+      // Close mobile nav if open
+      if(mobileNav.classList.contains('show')) {
+        toggleMobileNav();
+      }
+    }
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        setActivePage(link.dataset.page);
+      });
+    });
+    // Mobile hamburger toggle
+    function toggleMobileNav() {
+      const isOpen = mobileNav.classList.toggle('show');
+      hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      mobileNav.hidden = !isOpen;
+    }
+    hamburgerBtn.addEventListener('click', toggleMobileNav);
+
+    // Close mobile nav on outside click or ESC key
+    document.addEventListener('click', e => {
+      if(mobileNav.classList.contains('show') && !mobileNav.contains(e.target) && e.target !== hamburgerBtn) {
+        toggleMobileNav();
+      }
+    });
+    document.addEventListener('keydown', e => {
+      if(e.key === 'Escape' && mobileNav.classList.contains('show')) {
+        toggleMobileNav();
+        hamburgerBtn.focus();
+      }
+    });
+
+    // --- Home Page: Motivational Quotes with fade animation ---
+    const quotes = [
+      `"The beautiful thing about learning is nobody can take it away from you." - B.B. King`,
+      `"Push yourself because no one else is going to do it for you."`,
+      `"Success is no accident. It is hard work, perseverance, learning, studying, sacrifice and most of all, love of what you are doing." - Pele`,
+      `"Don't watch the clock; do what it does. Keep going." - Sam Levenson`,
+      `"The expert in anything was once a beginner." - Helen Hayes`,
+      `"Your limitation—it’s only your imagination."`,
+      `"Start where you are. Use what you have. Do what you can." - Arthur Ashe`,
+      `"Believe you can and you're halfway there." - Theodore Roosevelt`
+    ];
+    const quoteElem = document.getElementById('motivational-quote');
+    const changeQuoteBtn = document.getElementById('change-quote-btn');
+    let currentQuoteIndex = 0;
+
+    function fadeText(elem, newText) {
+      elem.style.opacity = 0;
+      setTimeout(() => {
+        elem.textContent = newText;
+        elem.style.opacity = 1;
+      }, 500);
+    }
+
+    changeQuoteBtn.addEventListener('click', () => {
+      let newIndex;
+      do {
+        newIndex = Math.floor(Math.random() * quotes.length);
+      } while(newIndex === currentQuoteIndex);
+      currentQuoteIndex = newIndex;
+      fadeText(quoteElem, quotes[currentQuoteIndex]);
+    });
+
+    // --- Subjects Page: Load subjects & grades from JSON ---
+    const subjectsData = [
+      { name: 'Mathematics', grade: 'A' },
+      { name: 'Physics', grade: 'B+' },
+      { name: 'Computer Hardware', grade: 'A-' },
+      { name: 'English Literature', grade: 'A+' },
+      { name: 'Digital Logic', grade: 'C' },
+      { name: 'Computer Science', grade: 'A+' }
+    ];
+    const subjectListElem = document.querySelector('.subject-list');
+    function renderSubjects() {
+      subjectListElem.innerHTML = '';
+      subjectsData.forEach(subj => {
+        const item = document.createElement('div');
+        item.className = 'subject-item';
+        item.innerHTML = `
+          <div class="subject-name" tabindex="0"><span class="material-icons" aria-hidden="true">menu_book</span>${subj.name}</div>
+          <div class="subject-grade" aria-label="Grade: ${subj.grade}" tabindex="0">${subj.grade}</div>
+        `;
+        subjectListElem.appendChild(item);
+      });
+    }
+    renderSubjects();
+
+    // --- To-Do List ---
+    const todoForm = document.getElementById('todo-form');
+    const todoInput = document.getElementById('todo-input');
+    const todoList = document.getElementById('todo-list');
+    let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+    function saveTodos() {
+      localStorage.setItem('todos', JSON.stringify(todos));
+    }
+
+    function renderTodos() {
+      todoList.innerHTML = '';
+      todos.forEach((todo, idx) => {
+        const li = document.createElement('li');
+        li.className = todo.completed ? 'completed' : '';
+        li.setAttribute('tabindex', '0');
+        li.innerHTML = `
+          <input type="checkbox" class="todo-checkbox" aria-label="Mark task '${todo.text}' as complete" ${todo.completed ? 'checked' : ''} />
+          <span class="todo-text" tabindex="0">${todo.text}</span>
+          <button class="todo-remove-btn" aria-label="Remove task '${todo.text}'" title="Remove task">&times;</button>
+        `;
+        // Checkbox toggle
+        li.querySelector('.todo-checkbox').addEventListener('change', e => {
+          todos[idx].completed = e.target.checked;
+          saveTodos();
+          renderTodos();
+        });
+        // Remove button
+        li.querySelector('.todo-remove-btn').addEventListener('click', () => {
+          todos.splice(idx, 1);
+          saveTodos();
+          renderTodos();
+        });
+        todoList.appendChild(li);
+      });
+    }
+    renderTodos();
+
+    todoForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const text = todoInput.value.trim();
+      if(text === '') return;
+      todos.push({text, completed: false});
+      saveTodos();
+      renderTodos();
+      todoInput.value = '';
+      todoInput.focus();
+    });
+
+    // --- Calendar Page ---
+    const calendarElem = document.querySelector('#calendar-page .calendar');
+    const monthSelect = document.getElementById('month-select');
+    const yearSelect = document.getElementById('year-select');
+
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    let currentCalendarDate = new Date(); // To keep track of the currently displayed month/year
+
+    function populateMonthSelect() {
+      monthSelect.innerHTML = ''; // Clear existing options
+      months.forEach((month, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = month;
+        monthSelect.appendChild(option);
+      });
+    }
+
+    function populateYearSelect() {
+      yearSelect.innerHTML = ''; // Clear existing options
+      const currentYear = new Date().getFullYear();
+      for (let i = currentYear - 5; i <= currentYear + 5; i++) { // Show 5 years before and 5 years after
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        yearSelect.appendChild(option);
+      }
+    }
+
+    function buildCalendar(year, month) {
+      // Remove all days, but keep the weekday headers (first 7 children)
+      while (calendarElem.children.length > 7) {
+        calendarElem.removeChild(calendarElem.lastChild);
+      }
+
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const startWeekday = firstDay.getDay(); // 0 for Sunday, 1 for Monday, etc.
+
+      // Set selected values in dropdowns
+      monthSelect.value = month;
+      yearSelect.value = year;
+
+      // Add blank days for the start of the month
+      for(let i = 0; i < startWeekday; i++) {
+        const blank = document.createElement('div');
+        blank.className = 'calendar-day';
+        blank.setAttribute('aria-hidden', 'true');
+        calendarElem.appendChild(blank);
+      }
+
+      const eventsData = {
+        '2024-05-18': [{title: 'Physics Exam', type: 'exam'}],
+        '2024-05-25': [{title: 'History Project Due', type: 'deadline'}],
+        '2024-05-04': [{title: 'Summer Break Starts', type: 'holiday'}],
+        '2024-05-15': [{title: 'Math Workshop', type: 'event'}],
+        '2024-05-01': [{title: 'New Semester Begins', type: 'event'}],
+      };
+
+      const today = new Date();
+      // Add actual days of the month
+      for(let day = 1; day <= daysInMonth; day++) {
+        const dayElem = document.createElement('div');
+        dayElem.className = 'calendar-day';
+        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        dayElem.setAttribute('role', 'gridcell');
+        dayElem.setAttribute('aria-label', `Date: ${months[month]} ${day}, ${year}`);
+
+        if(year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+          dayElem.classList.add('today');
+          dayElem.setAttribute('aria-current', 'date');
+        }
+        dayElem.innerHTML = `<div class="calendar-date">${day}</div>`;
+        
+        if(eventsData[dateStr]) {
+          eventsData[dateStr].forEach(ev => {
+            const eventElem = document.createElement('div');
+            eventElem.className = 'calendar-event';
+            eventElem.textContent = ev.title;
+            eventElem.setAttribute('title', ev.title); // Tooltip for full event title
+            dayElem.appendChild(eventElem);
+          });
+        }
+        calendarElem.appendChild(dayElem);
+      }
+    }
+
+    // Initialize month and year dropdowns
+    populateMonthSelect();
+    populateYearSelect();
+
+    // Set initial calendar view to current month and year
+    buildCalendar(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth());
+
+    // Add event listeners for month and year changes
+    monthSelect.addEventListener('change', () => {
+      const selectedYear = parseInt(yearSelect.value);
+      const selectedMonth = parseInt(monthSelect.value);
+      currentCalendarDate = new Date(selectedYear, selectedMonth, 1);
+      buildCalendar(selectedYear, selectedMonth);
+    });
+
+    yearSelect.addEventListener('change', () => {
+      const selectedYear = parseInt(yearSelect.value);
+      const selectedMonth = parseInt(monthSelect.value);
+      currentCalendarDate = new Date(selectedYear, selectedMonth, 1);
+      buildCalendar(selectedYear, selectedMonth);
+    });
+
+
+    // --- Timer Page ---
+    const timerText = document.getElementById('timer-text');
+    const startPauseBtn = document.getElementById('start-pause-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const modeWorkBtn = document.getElementById('mode-work');
+    const modeBreakBtn = document.getElementById('mode-break');
+    const progressBar = document.querySelector('.timer-display .progress');
+    const circumference = 2 * Math.PI * 54; // 2 * pi * r, where r = 54
+
+    progressBar.style.strokeDasharray = circumference;
+
+    let timer;
+    let totalSeconds;
+    let secondsLeft;
+    let isPaused = true;
+    let currentMode = 'work'; // 'work' or 'break'
+
+    const modes = {
+      work: 25 * 60, // 25 minutes
+      break: 5 * 60 // 5 minutes
+    };
+
+    function updateTimerDisplay() {
+      const minutes = Math.floor(secondsLeft / 60);
+      const seconds = secondsLeft % 60;
+      timerText.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      updateProgressBar();
+    }
+
+    function updateProgressBar() {
+      const offset = circumference - (secondsLeft / totalSeconds) * circumference;
+      progressBar.style.strokeDashoffset = offset;
+    }
+
+    function startTimer() {
+      if (!isPaused) return; // Prevent multiple intervals
+      isPaused = false;
+      startPauseBtn.textContent = 'Pause';
+      startPauseBtn.setAttribute('aria-pressed', 'true');
+
+      timer = setInterval(() => {
+        secondsLeft--;
+        if (secondsLeft < 0) {
+          clearInterval(timer);
+          isPaused = true;
+          startPauseBtn.textContent = 'Start';
+          startPauseBtn.setAttribute('aria-pressed', 'false');
+          alert(`${currentMode === 'work' ? 'Work' : 'Break'} session finished!`);
+          // Optionally switch modes automatically
+          currentMode = currentMode === 'work' ? 'break' : 'work';
+          totalSeconds = modes[currentMode];
+          secondsLeft = totalSeconds;
+          updateModeButtons();
+        }
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      clearInterval(timer);
+      isPaused = true;
+      startPauseBtn.textContent = 'Start';
+      startPauseBtn.setAttribute('aria-pressed', 'false');
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      totalSeconds = modes[currentMode];
+      secondsLeft = totalSeconds;
+      updateTimerDisplay();
+    }
+
+    function switchMode(mode) {
+      if (currentMode === mode) return;
+      currentMode = mode;
+      resetTimer();
+      updateModeButtons();
+    }
+
+    function updateModeButtons() {
+      modeWorkBtn.classList.toggle('active', currentMode === 'work');
+      modeWorkBtn.setAttribute('aria-checked', currentMode === 'work' ? 'true' : 'false');
+      modeBreakBtn.classList.toggle('active', currentMode === 'break');
+      modeBreakBtn.setAttribute('aria-checked', currentMode === 'break' ? 'true' : 'false');
+    }
+
+    // Initial setup for timer
+    totalSeconds = modes[currentMode];
+    secondsLeft = totalSeconds;
+    updateTimerDisplay();
+
+    startPauseBtn.addEventListener('click', () => {
+      if (isPaused) {
+        startTimer();
+      } else {
+        pauseTimer();
+      }
+    });
+
+    resetBtn.addEventListener('click', resetTimer);
+    modeWorkBtn.addEventListener('click', () => switchMode('work'));
+    modeBreakBtn.addEventListener('click', () => switchMode('break'));
+
+  })();
+</script>
+</body>
+</html>
+```
